@@ -1,10 +1,17 @@
 #!/bin/bash
+#
+# teleport user [height]
+#
+# This probably does not work if you haven't the dynmap plugin installed
+# as this delays the teleport until dynmap keeps up.
+#
+# BTW spams the Bukkit console a lot.
 
 connecter()
 {
 while	echo OOPS
 do
-	socat - unix:/var/tmp/autostart/mc/bukkit.sock
+	socat - "unix:/var/tmp/autostart/$USER/bukkit.sock"
 done
 }
 

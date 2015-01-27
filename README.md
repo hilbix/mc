@@ -111,7 +111,7 @@ Perhaps you need to do a relogin for the command to work.
 > A: Nope.  But you can.  `cd contrib; git submodule add URL-of-your-plugin-builder pluginname; cd pluginname; vim Makefile`.  See `plugins` for example.
 
 - Q: License?
-> A: Are you kidding?  This?  Free, what else?  Parts of the software linked here is Open Source with different licenses, of course.
+> A: Are you kidding?  This?  Free, what else!  Parts of the software linked here is Open Source with different licenses, of course.
 
 - Q: Author?
 > A: Not important.  This only assembles many things done by others.  Read the source for more information.

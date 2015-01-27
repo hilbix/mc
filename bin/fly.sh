@@ -1,4 +1,13 @@
 #!/bin/bash
+#
+# Scans an area by teleporting a dummy around
+#
+# Example
+#	scan 1000 1000 | fly dummy
+# To find a possibly dummy:
+#	bukkit list
+# You probably only should do this with a user in "gamemode 1" like:
+#	bukkit gamemode 1 dummy
 
 delta()
 {
@@ -34,5 +43,5 @@ do
 	do
 		echo "$x $y $z"
 	done
-done | ~/bin/teleport.sh "$@"
+done | ~/bin/teleport "$@"
 
