@@ -1,4 +1,4 @@
-*Not really helpful for others yet*
+*Not really helpful for others yet, as this is not yet complete*
 
 # MCbuild
 

@@ -2,7 +2,8 @@
 
 SOFTLINKS=autostart jar
 TOOLS=src/nonblocking/nonblocking src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect src/ptybuffer/script/autostart.sh
-CLEANDIRS=src/nonblocking src/ptybuffer
+CLEANDIRS=src/nonblocking src/ptybuffer compile/turmites
+SUBS=jar/turmites.jar
 JAR=craftbukkit-1.8.jar
 BUILD=tmpbuild
 SPIGOTURL=https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/
@@ -12,16 +13,25 @@ BINDIR=$(HOME)/bin
 CRON=* * * * *
 
 .PHONY: all
-all:	jar/$(JAR) $(TOOLS)
+all:	jar/$(JAR) $(TOOLS) $(SUBS)
 
 .PHONY: update
 update:	compile
 
+jar/$(JAR):
+	make compile
+
 src/nonblocking/nonblocking:
 	make -C "`dirname '$@'`"
 
-jar/$(JAR):
-	make compile
+src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect src/ptybuffer/script/autostart.sh:
+	make -C "`dirname '$@'`"
+
+jar/turmites.jar:	jar/$(JAR) compile/turmites/turmites.jar
+	cp -f compile/turmites/turmites.jar jar/
+
+compile/turmites/turmites.jar:
+	make -C compile/turmites
 
 .PHONY: compile
 compile:	
@@ -32,8 +42,7 @@ compile:
 
 .PHONY: clean
 clean:
-	for a in $(CLEANDIRS); do make -C "$$a" clean; done
-	make -C src/ptybuffer clean
+	for a in $(CLEANDIRS); do make -C "$$a" distclean; done
 	rm -rf $(BUILD)
 
 .PHONY: realclean

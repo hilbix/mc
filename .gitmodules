@@ -1,3 +1,6 @@
 [submodule "src"]
 	path = src
 	url = https://github.com/hilbix/src.git
+[submodule "compile/turmites"]
+	path = compile/turmites
+	url = https://github.com/hilbix/turmites.git
