@@ -1,0 +1,156 @@
+<!--
+  Put this into the javadoc index where you want a quick interactive input box to restrict what you see.
+
+  This Works is placed under the terms of the Copyright Less License,
+  see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+
+  This is not meant to be nice nor portable.  It is meant to just do the job at my side.
+-->
+<input id="searchinput" type="text" onfocus="searchinput(this)" onkeyup="searchinput(this)"></input>
+<script>
+function _D()
+{
+  // Apparently Mozilla developers working on Firefox 30 threw away their brain with Firefox 30.  Period.
+
+  var cons = window.console;
+  try { _D.logger.apply(cons, arguments); return; } catch (e) { }
+
+  // Following idea is stolen from nginx-push-stream-module, but in contrast to there it is correctly implemented here:
+  if (cons && cons.log)
+    {
+      if (cons.log.apply)			_D.logger = cons.log;
+      else if (typeof cons.log === 'object')
+        if (Function.prototype.bind)		_D.logger = Function.prototype.bind.call(cons.log, cons);
+        else if (Function.prototype.call)	_D.logger = function() { Function.prototype.call.call(cons.log, cons, Array.prototype.slice.call(arguments)) };
+    }
+
+  try { _D.logger.apply(cons, arguments); return; } catch (e) { }
+
+  D = function(){};	// give up
+}
+// This should be as easy as:
+// var D=(console && console.log) ? console.log : function() {};
+var D=_D;
+
+function later(fn)
+{
+  window.setTimeout(fn.apply(this, Array.prototype.slice.call(arguments, 1)), 1);
+}
+
+function delayedupdateable(tick, fn)
+{
+  var running = false, args, self;
+
+  return function()
+   {
+     args = Array.prototype.slice.call(arguments);
+     self = this;
+
+     if (running)
+       return;
+     running = true;
+     window.setTimeout(function() { running=false; fn.apply(self, args); }, tick);
+   }
+}
+
+function disp(e,yn)
+{
+  e.style.display = yn ? '' : 'none';
+}
+
+var whoopsie = false;
+
+function found(t,a)
+{
+  if (!t)
+    {
+      whoopsie = true;
+      return true;
+    }
+  t = t.toLowerCase();
+  for (s in a)
+    if (!~t.indexOf(a[s]))
+      return false;
+  return true;
+}
+
+function folddl(e,h)
+{
+  var ok = false;
+
+  D(e.nodeName);
+
+  var d = '';
+  for (var c=e.firstChild; c; c=c.nextSibling)
+    {
+      if (c.nodeType!==1)
+	continue;
+      if (c.nodeName!=='DT')
+	{
+	  c.style.display = d;
+	  continue;
+	}
+      d = 'none';
+      if (found(c.textContent, h))
+	{
+	  ok = true;
+	  d = '';
+	}
+      c.style.display = d;
+    }
+  return ok;
+}
+
+function foldh2(e,h)
+{
+  for (var dl=e.nextSibling; dl; dl=dl.nextSibling)
+    if (dl.nodeType===1)
+      if (dl.nodeName==='DL')
+	{
+	  disp(e, folddl(dl, h));
+	  return;
+	}
+      else
+	D("oops "+dl.nodeName);
+
+  D("oops=NULL");
+}
+
+function search(s)
+{
+  s = s.split(" ");
+  D("search '"+s.toString()+"'");
+
+  var h2 = document.getElementsByTagName('h2');
+  for (h in h2)
+    later(function(o) { foldh2(o,s); }, h2[h]);
+}
+
+var _search = delayedupdateable(100, search);
+
+function searchinput(e)
+{
+  var s = ''+e.value;
+  s = s.trim().replace(/\s\s+/g," ").toLowerCase();
+
+  if (e._searchinput === s)
+    return;
+  e._searchinput = s;
+
+  if (whoopsie)
+    alert("whoopsie, your browser does not support textContent, so this does not work");
+  else
+    _search(s);
+
+  return true;
+}
+
+function init_searchinput()
+{
+  var e = document.getElementById("searchinput");
+  e.focus();
+  e.selectionStart = e.selectionEnd = e.value.length;
+}
+
+window.addEventListener('load', init_searchinput, false);
+</script>
