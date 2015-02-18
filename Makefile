@@ -34,6 +34,7 @@ SPIGOTJAR=BuildTools.jar
 
 .PHONY: all
 all:	jar/$(CBJAR) $(TOOLS) $(SUBS)
+	make -C contrib all
 
 .PHONY: update
 update:	compile
@@ -76,11 +77,13 @@ compile:
 clean:
 	for a in $(CLEANDIRS); do make -C "$$a" distclean; done
 	rm -rf $(BUILD)
+	make -C contrib clean
 
 .PHONY: realclean
 realclean:	clean
-	rm -rf jar
 	# DOC is not cleaned
+	rm -rf jar
+	make -C contrib realclean
 
 .PHONY: doc
 doc:	$(BUILD)/Bukkit
@@ -97,5 +100,6 @@ install:	all
 	@echo
 	@echo Creating a bukkit not yet implemented
 	@echo
+	make -C contrib install
 	@exit 1
 

@@ -108,7 +108,8 @@ Perhaps you need to do a relogin for the command to work.
 > A: It works as designed.  But see "I found a bug!".
 
 - Q: Can you add plugin XYZ.
-> A: Nope.  But you can.  `cd contrib; git submodule add URL-of-your-plugin-builder pluginname; cd pluginname; vim Makefile`.  See `plugins` for example.
+> A: Nope.  But you can.  `git submodule add URL-of-your-plugin-builder contrib/pluginname; cd contrib; vim Makefile`.
+> See `compile/` for example.
 
 - Q: License?
 > A: Are you kidding?  This?  Free, what else!  Parts of the software linked here is Open Source with different licenses, of course.
