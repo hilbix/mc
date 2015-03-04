@@ -58,15 +58,15 @@ src/nonblocking/nonblocking src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconne
 
 jar/turmites.jar:	compile/turmites/turmites.jar
 	rm -f '$@'
-	cp -f '$<' '$@'
+	cp -f $< '$@'
 
 jar/worldedit.jar:	compile/worldedit/worldedit-bukkit/build/libs/$(WORLDEDITJAR)
 	rm -f '$@'
-	cp -f '$<' '$@'
+	cp -f $< '$@'
 
 jar/dynmap.jar:	compile/dynmap/dynmap/target/$(DYNMAPJAR)
 	rm -f '$@'
-	cp -f '$<' '$@'
+	cp -f $< '$@'
 
 compile/dynmap/dynmap/target/$(DYNMAPJAR):
 	make -C compile dynmap
