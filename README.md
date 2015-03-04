@@ -3,20 +3,22 @@ In short what this does:
 Just type `make`, then you will find following in `jar/`:
 
 - `jar/craftbukkit-1.8.jar` - by invoking the Spigot build process
+- `jar/dynmap.jar` suitable for this Craftbukkit 1.8
 - `jar/worldedit.jar` suitable for this Craftbukkit 1.8
 - `jar/turmites.jar`
 
 Terribly incomplete:
 
-- `make install`:  It prepares the environment, but it not yet creates a workable `~/bukkit/` directory
-- `turmites` plugin to CraftBukkit
+- `make install`:  It prepares the environment, but it not yet create a workable `~/bukkit/` directory
+- `turmites` plugin to CraftBukkit, it is just at the beginning
 
 Turmites currently just can do:
 
 - load/save books (see `/t load` and `/t save`)
 - set fly and walkspeed (see `/t set`)
+- get the position of any player
 
-Note that when `turmites` starts to become really working inclusion of WorldEdit will be droped as it is mostly redundant.
+Note that when `turmites` starts to become really working inclusion of WorldEdit will be droped as it becomes mostly redundant.
 
 
 # MCbuild
@@ -42,6 +44,7 @@ Prepare a fresh Debian like following:
 ```bash
 sudo apt-get install git gawk build-essential wget socat
 sudo apt-get install openjdk-7-jdk
+sudo apt-get install maven	# for dynmap
 adduser --disabled-password --gecos 'Minecraft 1.8' mc
 ```
 
