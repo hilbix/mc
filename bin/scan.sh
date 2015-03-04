@@ -8,11 +8,11 @@ exit 1
 
 let w="0+$1" || OOPS "$1x$2"
 let h="0+$2" || OOPS "$1x$2"
+let d="0+${3:-200}" || OOPS "delta $3?"
 
-[ 4000 -ge $w ] || OOPS w=$w
-[ 3000 -ge $h ] || OOPS h=$h
+[ 15000 -ge $w ] || OOPS w=$w
+[ 15000 -ge $h ] || OOPS h=$h
 
-d=200
 y=-$h
 while [ $y -lt $h ]
 do

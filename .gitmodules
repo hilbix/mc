@@ -7,3 +7,15 @@
 [submodule "compile/worldedit"]
 	path = compile/worldedit
 	url = https://github.com/sk89q/WorldEdit.git
+[submodule "compile/dynmap/DynmapCoreApi"]
+	path = compile/dynmap/DynmapCoreApi
+	url = https://github.com/webbukkit/DynmapCoreApi.git
+[submodule "compile/dynmap/DynmapCore"]
+	path = compile/dynmap/DynmapCore
+	url = https://github.com/webbukkit/DynmapCore.git
+[submodule "compile/dynmap/dynmap-api"]
+	path = compile/dynmap/dynmap-api
+	url = https://github.com/webbukkit/dynmap-api.git
+[submodule "compile/dynmap/dynmap"]
+	path = compile/dynmap/dynmap
+	url = https://github.com/webbukkit/dynmap.git

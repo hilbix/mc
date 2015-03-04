@@ -61,9 +61,15 @@ while
 	read -r $wait cmd || echo TIMEOUT >&0 || exit 1
 do
 	case "$cmd" in
-	''|start|run)	rm -f .backupped
+	''|start|run)
+		rm -f .backupped
 		log STARTING server
-		java -Xms2048M -Xmx2048M -jar craftbukkit.jar
+		JAVA=java
+		JAVAMEM=3G
+		JAVARGS=
+		[ -x startup-hook.sh ] && . startup-hook.sh
+		[ -n "$JAVARGS" ] || JAVARGS="-Xms$JAVAMEM -Xmx$JAVAMEM"
+		$JAVA $JAVARGS -jar craftbukkit.jar
 		log TERMINATED with error code $?
 		autobackup
 		;;

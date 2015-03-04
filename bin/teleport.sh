@@ -26,6 +26,18 @@ echo "$PROC $IN $OU"
 name="$1"
 lv="${2:-100}"
 
+if	[ 0 = $# -o -z "$name" ]
+then
+	echo "Usage: `basename "$0"` USER [HEIGHT]
+        Teleport a user to the given game coordinates provided on STDIN
+	and delay teleportation if dynmap is ovewhelmed.
+        Coordinates are given EAST SOUTH HEIGHT, HEIGHT defaults to 100.
+        USER must be in 'gamemode 1'.
+        To find USER, use 'bukkit list'.
+	You probably want to use 'fly' which moves the USER at a speed." >&2
+	exit 1
+fi
+
 getq()
 {
 ~/bin/nonblocking <&$IN >/dev/null
@@ -58,19 +70,29 @@ do
 done
 
 getq || exit
+getq || exit
 setmin $l
 
 while	z="$lv"
 	echo -n "$1@$x $y $z: "
 	read -r x y z
 do
-	~/bin/nonblocking <&$IN
 	[ -n "$z" ] && [ 0 -lt "$z" ] && lv="$z"
-	echo "tp $1 $x ${z:-$lv} $y" >&$OU
-	read -ru$IN -t60 line || echo "OOPS: $?"
-	echo "$line"
-	read -ru$IN -t60 line || echo "OOPS: $?"
-	echo "${line///}"
+
+	while	~/bin/nonblocking <&$IN
+		echo "tp $1 $x ${z:-$lv} $y" >&$OU
+		read -ru$IN -t60 line || echo "OOPS: $?"
+		echo "$line"
+		read -ru$IN -t60 line || echo "OOPS: $?"
+		echo "${line///}"
+		case "$line" in
+		*"invalid format"*)	true;;
+		*)			false;;
+		esac
+	do
+		sleep 10
+	done
+
 	if	getq && [ $min -lt $l ]
 	then
 		echo "============= $min < $l ================="

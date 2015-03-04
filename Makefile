@@ -6,7 +6,8 @@
 CBVER=1.8
 #
 # WorldEdit version
-WEVER=6.0.2-SNAPSHOT
+WEVER=*-SNAPSHOT
+DMVER=*-SNAPSHOT
 #
 # When to run cronjob to start server (each minute)
 CRON=* * * * *
@@ -24,13 +25,18 @@ DOCDIR=/var/www/html/doc
 
 SOFTLINKS=autostart jar
 TOOLS=src/nonblocking/nonblocking src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect src/ptybuffer/script/autostart.sh
-CLEANDIRS=src/nonblocking src/ptybuffer compile/turmites
-SUBS=jar/turmites.jar jar/worldedit.jar
+CLEANDIRS=src/nonblocking src/ptybuffer compile contrib
+SUBS=jar/turmites.jar jar/worldedit.jar jar/dynmap.jar
 CBJAR=craftbukkit-$(CBVER).jar
 WORLDEDITJAR=worldedit-bukkit-$(WEVER)-dist.jar
+DYNMAPJAR=dynmap-$(DMVER).jar
 BUILD=tmpbuild
 SPIGOTURL=https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/
 SPIGOTJAR=BuildTools.jar
+
+#
+# all, update
+#
 
 .PHONY: all
 all:	jar/$(CBJAR) $(TOOLS) $(SUBS)
@@ -39,30 +45,44 @@ all:	jar/$(CBJAR) $(TOOLS) $(SUBS)
 .PHONY: update
 update:	compile
 
-jar/$(CBJAR) $(BUILD)/Bukkit:
-	make compile
-
+#
 # Tools
+#
 
-src/nonblocking/nonblocking:
+src/nonblocking/nonblocking src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect:
 	make -C "`dirname '$@'`"
 
-src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect src/ptybuffer/script/autostart.sh:
-	make -C "`dirname '$@'`"
-
+#
 # JARs
+#
 
-jar/turmites.jar:	jar/$(CBJAR) compile/turmites/turmites.jar
-	cp -f compile/turmites/turmites.jar jar/
+jar/turmites.jar:	compile/turmites/turmites.jar
+	rm -f '$@'
+	cp -f '$<' '$@'
 
 jar/worldedit.jar:	compile/worldedit/worldedit-bukkit/build/libs/$(WORLDEDITJAR)
-	cp -f compile/worldedit/worldedit-bukkit/build/libs/$(WORLDEDITJAR) jar/worldedit.jar
+	rm -f '$@'
+	cp -f '$<' '$@'
 
-compile/turmites/turmites.jar:
-	make -C compile/turmites
+jar/dynmap.jar:	compile/dynmap/dynmap/target/$(DYNMAPJAR)
+	rm -f '$@'
+	cp -f '$<' '$@'
+
+compile/dynmap/dynmap/target/$(DYNMAPJAR):
+	make -C compile dynmap
+
+compile/turmites/turmites.jar:	jar/$(CBJAR)
+	make -C compile turmites
 
 compile/worldedit/worldedit-bukkit/build/libs/$(WORLDEDITJAR):
 	make -C compile worldedit
+
+jar/$(CBJAR) $(BUILD)/Bukkit:
+	make compile
+
+#
+# COMPILE
+#
 
 .PHONY: compile
 compile:	
@@ -71,19 +91,33 @@ compile:
 	rm -f 'jar/$(CBJAR)'
 	cp -f '$(BUILD)/$(CBJAR)' jar/
 
-# Helpers
+.PHONY: fix
+fix:
+	for a in $(CLEANDIRS); do make -C "$$a" fix; done
+
+#
+# CLEAN
+#
 
 .PHONY: clean
 clean:
-	for a in $(CLEANDIRS); do make -C "$$a" distclean; done
+	for a in $(CLEANDIRS); do make -C "$$a" clean; done
 	rm -rf $(BUILD)
-	make -C contrib clean
 
-.PHONY: realclean
-realclean:	clean
+.PHONY: distclean
+distclean:	clean
 	# DOC is not cleaned
+	echo "To wipe jar/ which you need this to run Bukkit, use: make fullclean"
+	for a in $(CLEANDIRS); do make -C "$$a" distclean; done
+
+# fullclean wipes the JARs which are needed by Bukkit to run
+.PHONY: fullclean
+fullclean:	distclean
 	rm -rf jar
-	make -C contrib realclean
+
+#
+# MAIN
+#
 
 .PHONY: doc
 doc:	$(BUILD)/Bukkit
