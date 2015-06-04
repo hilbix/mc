@@ -20,14 +20,15 @@ exit 1
 mover()
 {
 wait
-"$MOVER" " in background" &
+"$MOVER" &
+log "started $MOVER in background, PID $!"
 sleep 1
 }
 
 backup()
 {
 [ -f .backupped ] && return
-"$BACKUP" && touch .backupped && mover
+"$BACKUP" && touch .backupped && [ -x "$MOVER" ] && mover
 }
 
 autobackup()
@@ -81,6 +82,8 @@ do
 	backup)	backup; continue;;
 	bkon)	touch .autobackup; continue;;
 	bkoff)	rm -f .autobackup; continue;;
+	bklist)	"$BACKUP" list;;
+	'bkinfo '*)	"$BACKUP" info "${cmd#* }";;
 	auto|autostart)	touch .RUNNING;;
 	*)	echo "Unknown command.  Possible control-CMDs:"
 		echo "	start	(or empty line) to start server"
@@ -92,6 +95,10 @@ do
 		echo "	backup	do a backup (if backup script is installed)" &&
 		echo "	bkoff	switch autobackup off" &&
 		echo "	bkon	switch autobackup on" &&
+		echo "	bklist	list backups" &&
+		echo "	bkinfo	get info on backup" &&
+		echo "	bkcheck	check backup archive" &&
+		[ -x "$MOVER" ] &&
 		echo "	move	start data mover again (to transfers backups)" &&
 		echo "	wait	wait for data mover to finish"
 		continue;;
