@@ -39,12 +39,13 @@ This here runs on a nonpublic 1-2 user VM with 4 GB RAM, 3 CPU threads of a 3.4 
 
 This needs around 1 GB in `mc/`, and a lot more in `bukkit/`
 
-Prepare a fresh Debian like following:
+Prepare a fresh Debian (jessie) like following:
 
 ```bash
 sudo apt-get install git gawk build-essential wget socat
 sudo apt-get install openjdk-7-jdk
-sudo apt-get install maven	# for dynmap
+sudo apt-get install libzmq3-dev pkg-config libtool-bin autoconf	# ZeroMQ java binding
+sudo apt-get install maven				# for dynmap
 adduser --disabled-password --gecos 'Minecraft 1.8' mc
 ```
 

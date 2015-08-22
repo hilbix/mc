@@ -24,9 +24,9 @@ run()
 {
 case "$1" in
 '')		run prune; run backup;;
-backup)		attic create -v -s "$BACK::mc-`date +%Y%m%d-%H%M%S`" .;;
+backup)		attic create -v -s "$BACK::mc-`date +%Y%m%d-%H%M%S`" "$(readlink -e .)";;
 list|check)	attic "$1" -v "$BACK";;
-info)		need "$2" YYYYMMDD-HHMMSS; attic -v "$BACK::mc-$2";;
+info)		need "$2" YYYYMMDD-HHMMSS; attic info -v "$BACK::mc-${2#mc-}";;
 prune)		attic prune -v -s --keep-within 1w --keep-daily 60 --keep-weekly 15 --keep-monthly 12 --keep-yearly -1 -p mc-;;
 esac
 }

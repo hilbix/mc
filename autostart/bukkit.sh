@@ -84,6 +84,7 @@ do
 	bkoff)	rm -f .autobackup; continue;;
 	bklist)	"$BACKUP" list;;
 	'bkinfo '*)	"$BACKUP" info "${cmd#* }";;
+	bkck)	"$BACKUP" check;;
 	auto|autostart)	touch .RUNNING;;
 	*)	echo "Unknown command.  Possible control-CMDs:"
 		echo "	start	(or empty line) to start server"
@@ -97,7 +98,7 @@ do
 		echo "	bkon	switch autobackup on" &&
 		echo "	bklist	list backups" &&
 		echo "	bkinfo	get info on backup" &&
-		echo "	bkcheck	check backup archive" &&
+		echo "	bkck	check backup archive" &&
 		[ -x "$MOVER" ] &&
 		echo "	move	start data mover again (to transfers backups)" &&
 		echo "	wait	wait for data mover to finish"
