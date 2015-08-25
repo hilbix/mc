@@ -5,6 +5,8 @@ WAIT=10
 HERE="$PWD"
 BACKUP="$HERE/bin/backup.sh"
 MOVER="$HERE/bin/mover.sh"
+DIR=bukkit
+SERVER=craftbukkit.jar
 
 log()
 {
@@ -27,8 +29,8 @@ sleep 1
 
 backup()
 {
-[ -f .backupped ] && return
-"$BACKUP" && touch .backupped && [ -x "$MOVER" ] && mover
+[ -f .backupped ] && log "already backed up, to rerun: rm -f '$PWD/.backupped'" && return
+"$BACKUP" && touch .backupped && log 'Backup successful' && [ -x "$MOVER" ] && mover
 }
 
 autobackup()
@@ -37,9 +39,19 @@ autobackup()
 backup
 }
 
-cd bukkit || OOPS "WTF?"
+eula()
+{
+fgrep -x 'eula=false' eula.txt || return
+cat eula.txt || return
+echo -n "Please type AGREE to agree: "
+read agree || return
+[ .AGREE = ".$agree" ] || return
+sed -i 's/^eula=false$/eula=true/' eula.txt
+}
 
-log BUKKIT CONTROL started
+cd "$DIR" || OOPS "WTF? missing $DIR"
+
+log $DIR CONTROL started
 autobackup
 
 auto=:
@@ -63,6 +75,7 @@ while
 do
 	case "$cmd" in
 	''|start|run)
+		autobackup
 		rm -f .backupped
 		log STARTING server
 		JAVA=java
@@ -70,7 +83,7 @@ do
 		JAVARGS=
 		[ -x startup-hook.sh ] && . startup-hook.sh
 		[ -n "$JAVARGS" ] || JAVARGS="-Xms$JAVAMEM -Xmx$JAVAMEM"
-		$JAVA $JAVARGS -jar craftbukkit.jar
+		$JAVA $JAVARGS -jar "$SERVER"
 		log TERMINATED with error code $?
 		autobackup
 		;;
@@ -82,10 +95,10 @@ do
 	backup)	backup; continue;;
 	bkon)	touch .autobackup; continue;;
 	bkoff)	rm -f .autobackup; continue;;
-	bklist)	"$BACKUP" list;;
-	'bkinfo '*)	"$BACKUP" info "${cmd#* }";;
-	bkck)	"$BACKUP" check;;
+	list|info|check)	"$BACKUP" "$cmd";;
+	info' '*)		"$BACKUP" "${cmd%% *}" "${cmd#* }";;
 	auto|autostart)	touch .RUNNING;;
+	eula)	eula;;
 	*)	echo "Unknown command.  Possible control-CMDs:"
 		echo "	start	(or empty line) to start server"
 		echo "	stop	leave control (will be restarted in a minute by cron)"
@@ -96,9 +109,9 @@ do
 		echo "	backup	do a backup (if backup script is installed)" &&
 		echo "	bkoff	switch autobackup off" &&
 		echo "	bkon	switch autobackup on" &&
-		echo "	bklist	list backups" &&
-		echo "	bkinfo	get info on backup" &&
-		echo "	bkck	check backup archive" &&
+		echo "	list	list backups" &&
+		echo "	info	get info on backup" &&
+		echo "	check	check backup archive (warning: this takes very long)" &&
 		[ -x "$MOVER" ] &&
 		echo "	move	start data mover again (to transfers backups)" &&
 		echo "	wait	wait for data mover to finish"
@@ -106,5 +119,5 @@ do
 	esac
 	auto=:
 done
-log BUKKIT CONTROL stopped
+log $DIR CONTROL stopped
 

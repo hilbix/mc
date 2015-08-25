@@ -3,7 +3,8 @@
 # CONFIG:
 #
 # CraftBukkit version
-CBVER=1.8
+JARNAM=craftbukkit
+JARVER=1.8
 #
 # WorldEdit version
 WEVER=*-SNAPSHOT
@@ -15,7 +16,7 @@ CRON=* * * * *
 # Where to install scripts
 BINDIR=$(HOME)/bin
 #
-# Install directory (NOT YET IMPLEMENTED!)
+# Install directory
 INSDIR=$(HOME)/bukkit
 #
 # Target directory for "make doc"
@@ -27,7 +28,7 @@ SOFTLINKS=autostart jar
 TOOLS=src/nonblocking/nonblocking src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect src/ptybuffer/script/autostart.sh
 CLEANDIRS=src/nonblocking src/ptybuffer compile contrib
 SUBS=jar/turmites.jar jar/worldedit.jar jar/dynmap.jar
-CBJAR=craftbukkit-$(CBVER).jar
+CBJAR=$(JARNAM)-$(JARVER).jar
 WORLDEDITJAR=worldedit-bukkit-$(WEVER)-dist.jar
 DYNMAPJAR=dynmap-$(DMVER).jar
 BUILD=tmpbuild
@@ -127,13 +128,19 @@ doc:	$(BUILD)/Bukkit
 .PHONY: install
 install:	all
 	for a in $(SOFTLINKS); do rm -f "$$HOME/$$a" && ln -s "$(PWD)/$$a" "$$HOME/$$a"; done
-	mkdir -p '$(BINDIR)'
+	rm -f "$$HOME/log" && ln -s "/var/tmp/autostart/$$USER" "$$HOME/log"
+	mkdir -p '$(BINDIR)' '$(INSDIR)/plugins'
 	for a in $(TOOLS); do cp -f "$$a" '$(BINDIR)'; done
 	for a in bin/*.sh; do b="`basename "$$a" .sh`" && rm -f "$(BINDIR)/$$b" && ln -s "$(PWD)/$$a" "$$HOME/bin/$$b"; done
 	sbin/add-crontab.sh '$(CRON)' 'bin/autostart.sh >/dev/null' '### autostart bukkit'
-	@echo
-	@echo Creating a bukkit not yet implemented
-	@echo
+	[ -L '$(INSDIR)/$(CBJAR)' ]      || ln -vs '../jar/$(CBJAR)' '$(INSDIR)/$(CBJAR)'
+	[ -L '$(INSDIR)/$(JARNAM).jar' ] || ln -vs '$(CBJAR)' '$(INSDIR)/$(JARNAM).jar'
+	for a in $(SUBS); do [ -L "$(INSDIR)/plugins/`basename "$$a"`" ] || ln -vs "../../$$a" "$(INSDIR)/plugins/`basename "$$a"`"; done
 	make -C contrib install
-	@exit 1
+	@echo
+	@echo "Now run: bukkit"
+	@echo "To start the server, just hit the 'enter' key.
+	@echo "If the server tells swomething about the missing EULA, use the command: 'eula'"
+	@echo "AGREE to the eula.  Then start the server again by just hitting the 'enter' key."
+	@echo "Instead of pressing enter you can give commands like 'help' or 'auto'"
 
