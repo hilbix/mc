@@ -91,13 +91,20 @@ Note:
 
 ## Updates
 
-- To update this, if you haven't changed anything: `git pull; git submodule update --init --recursive; make; make install`
+- To update this, use `make pull`, this runs `git pull && git submodule update --init --recursive && make all`
 
 - If you have some `git` trouble, try `git status` and correct until `git status` is clean
 
 - To update the version of spigot: `cd && cd mc && make update && bukkit stop` (assumes autostart is on)
 
-- If `make` or `make update` fails, try `make clean all` instead
+- If `make` fails try `make clean all` instead
+
+- If `make update` fails, try `make clean update` instead
+
+
+## Helpers
+
+- `make doc`:  This installs a searchable index for the Bukkit-API into `/var/www/html/doc/bukkit/` (switch to "Index" to see a type ahead search bar, which is very helpful to locate things quickly in the Bukkit API)
 
 
 ## Contents

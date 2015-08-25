@@ -73,6 +73,7 @@ while
 	fi
 	read -r $wait cmd || echo TIMEOUT >&0 || exit 1
 do
+	[ -f "$SERVER" ] || OOPS "missing $SERVER ($PWD)"
 	case "$cmd" in
 	''|start|run)
 		autobackup

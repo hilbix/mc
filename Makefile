@@ -46,6 +46,10 @@ all:	jar/$(CBJAR) $(TOOLS) $(SUBS)
 .PHONY: update
 update:	compile
 
+.PHONY: pull
+pull:
+	git pull && git submodule update --init --recursive && make all
+
 #
 # Tools
 #
@@ -86,11 +90,11 @@ jar/$(CBJAR) $(BUILD)/Bukkit:
 #
 
 .PHONY: compile
-compile:	
-	mkdir -p jar $(BUILD)
-	cd $(BUILD) && wget -N $(SPIGOTURL)$(SPIGOTJAR) && java -jar $(SPIGOTJAR)
+compile:
+	mkdir -p jar '$(BUILD)'
+	cd '$(BUILD)' && wget -N '$(SPIGOTURL)$(SPIGOTJAR)' && java -jar '$(SPIGOTJAR)'
 	rm -f 'jar/$(CBJAR)'
-	cp -f '$(BUILD)/$(CBJAR)' jar/
+	cp -vf '$(BUILD)/$(JARNAM)-$(JARVER)'*.jar 'jar/$(CBJAR)'
 
 .PHONY: fix
 fix:
@@ -103,7 +107,7 @@ fix:
 .PHONY: clean
 clean:
 	for a in $(CLEANDIRS); do make -C "$$a" clean; done
-	rm -rf $(BUILD)
+	rm -rf '$(BUILD)'
 
 .PHONY: distclean
 distclean:	clean
@@ -117,7 +121,7 @@ fullclean:	distclean
 	rm -rf jar
 
 #
-# MAIN
+# INSTALL
 #
 
 .PHONY: doc
