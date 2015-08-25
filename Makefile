@@ -143,8 +143,6 @@ install:	all
 	make -C contrib install
 	@echo
 	@echo "Now run: bukkit"
-	@echo "To start the server, just hit the 'enter' key."
-	@echo "If the server tells swomething about the missing EULA, use the command: 'eula'"
-	@echo "AGREE to the eula.  Then start the server again by just hitting the 'enter' key."
-	@echo "Instead of pressing enter you can give commands like 'help' or 'auto'"
+	@echo "Answer the questions, then just hit the 'enter' key to start the server."
+	@echo "Instead of pressing enter you can give commands like 'help' or 'auto' or 'setup'"
 

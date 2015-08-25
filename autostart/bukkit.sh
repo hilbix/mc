@@ -6,7 +6,10 @@ HERE="$PWD"
 BACKUP="$HERE/bin/backup.sh"
 MOVER="$HERE/bin/mover.sh"
 DIR=bukkit
+CONF="$HERE/.$DIR.conf"
 SERVER=craftbukkit.jar
+EULA=eula.txt
+AUTOBACKUP=.autobackup
 
 log()
 {
@@ -35,28 +38,105 @@ backup()
 
 autobackup()
 {
-[ -f .autobackup ] || return
+[ -f "$AUTOBACKUP" ] || return
 backup
 }
 
-eula()
+: ok file key sep value
+ok()
 {
-fgrep -x 'eula=false' eula.txt || return
-cat eula.txt || return
-echo -n "Please type AGREE to agree: "
-read agree || return
-[ .AGREE = ".$agree" ] || return
-sed -i 's/^eula=false$/eula=true/' eula.txt
+grep -q "^[[:space:]]*$2[[:space:]]*$3[[:space:]]*$4[[:space:]]*$" "$1"
 }
 
-cd "$DIR" || OOPS "WTF? missing $DIR"
+: modify file key sep value
+modify()
+{
+ok "$@" && return
+sed -i "s|^\\([[:space:]]*\\)$2[[:space:]]*$3.*$|\\1$2$3$4|" "$1"
+ok "$@" || echo "$2$3$4" >> "$1"
+log "changed $1: $2$3$4"
+}
+
+: agree what file key sep val
+agree()
+{
+[ 5 = $# ] || OOPS agree needs 5 arguments
+ok "${@:2}" && return
+echo ========================================================================
+cat "$2" || return
+echo ========================================================================
+echo -n "Do you agree to $1?  Please type AGREE to agree: "
+read agree || return
+[ .AGREE = ".$agree" ] || return
+modify "${@:2}"
+}
+
+: yesno 1question 2file 3key 4sep 5yes 6no
+yesno()
+{
+[ 6 = $# ] || OOPS yesno needs 6 arguments
+was="y/N"
+[ ".$conf" = ".$5" ] && was="Y/n"
+echo -n "$1 [$was]? "
+read -r res || return
+case "$res" in
+y*|Y*)	conf="$5";;
+n*|N*)	conf="$6";;
+esac
+}
+
+: check 1mode 2typefn 3question 4file 5key 6sep 7val..
+check()
+{
+config="$4 $5"
+conf="$(sed -n "s|^$config	||p" "$CONF")"
+ok "$4" "$5" "$6" "${conf:-$7}"
+prev=$?
+$1 && [ 0 = $prev ] && return
+
+# takes conf/prev
+"${@:2}"
+# returns conf
+
+[ -n "$conf" ] || return
+modify "$4" "$5" "$6" "$conf"
+modify "$CONF" "$config" "	" "$conf"
+}
+
+setup()
+{
+[ -f "$SERVER" ] || return
+[ -f "$EULA" ] || run			# run once to populate directory
+
+check "$1" agree EULA "$EULA" eula = true
+check "$1" yesno 'Prevent plugin metrics from phoning home' plugins/PluginMetrics/config.yml opt-out ': ' true false
+check "$1" yesno 'Prevent snooper from phoning home' server.properties snooper-enabled = false true
+check "$1" yesno 'Disable dynmap webservice' plugins/dynmap/configuration.txt disable-webserver ': ' true false
+}
+
+start()
+{
+rm -f .backupped
+log STARTING server
+JAVA=java
+JAVAMEM=3G
+JAVARGS=
+[ -x startup-hook.sh ] && . startup-hook.sh
+[ -n "$JAVARGS" ] || JAVARGS="-Xms$JAVAMEM -Xmx$JAVAMEM"
+$JAVA $JAVARGS -jar "$SERVER"
+log TERMINATED with error code $?
+}
+
+cd "$DIR" || OOPS "missing $DIR"
 
 log $DIR CONTROL started
+
+setup true
 autobackup
 
 auto=:
 while	
-	[ -f .autobackup ] && echo Autobackup is ON
+	[ -f "$AUTOBACKUP" ] && echo Autobackup is ON
 	log =================================================
 	log = Please give CMD or hit Return to start server =
 	log =================================================
@@ -77,15 +157,7 @@ do
 	case "$cmd" in
 	''|start|run)
 		autobackup
-		rm -f .backupped
-		log STARTING server
-		JAVA=java
-		JAVAMEM=3G
-		JAVARGS=
-		[ -x startup-hook.sh ] && . startup-hook.sh
-		[ -n "$JAVARGS" ] || JAVARGS="-Xms$JAVAMEM -Xmx$JAVAMEM"
-		$JAVA $JAVARGS -jar "$SERVER"
-		log TERMINATED with error code $?
+		start
 		autobackup
 		;;
 	exit|stop)	break;;
@@ -94,18 +166,19 @@ do
 	halt)	auto=false; continue;;
 	noauto|noautostart)	rm -f .RUNNING; continue;;
 	backup)	backup; continue;;
-	bkon)	touch .autobackup; continue;;
-	bkoff)	rm -f .autobackup; continue;;
+	bkon)	touch "$AUTOBACKUP"; continue;;
+	bkoff)	rm -f "$AUTOBACKUP"; continue;;
 	list|info|check)	"$BACKUP" "$cmd";;
 	info' '*)		"$BACKUP" "${cmd%% *}" "${cmd#* }";;
 	auto|autostart)	touch .RUNNING;;
-	eula)	eula;;
+	setup|settings)	setup false;;
 	*)	echo "Unknown command.  Possible control-CMDs:"
 		echo "	start	(or empty line) to start server"
 		echo "	stop	leave control (will be restarted in a minute by cron)"
 		echo "	auto	autostart server after stopped"
 		echo "	noauto	do not autostart (permanently)"
 		echo "	halt	do not autostart (once)"
+		echo "	setup	Alter settings"
 		[ -x "$BACKUP" ] &&
 		echo "	backup	do a backup (if backup script is installed)" &&
 		echo "	bkoff	switch autobackup off" &&

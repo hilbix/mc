@@ -13,8 +13,8 @@ make
 make install
 hash -r
 bukkit
-start
-eula
+# Answer the questions
+# Then, you can enter commands.  To start the server use:
 start
 ```
 
