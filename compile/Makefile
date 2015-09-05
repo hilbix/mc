@@ -1,31 +1,9 @@
-#
+# Generic Makefile: Make all the subdirectories
 
-SUBDIR=dynmap turmites
+.PHONY: all clean distclean install fix
+all install fix:
+	for a in *; do [ -d "$$a" ] || continue; make -C "$$a" $@ || exit; done
 
-all:	worldedit dynmap turmites
-
-.PHONY: dynmap
-dynmap:
-	make -C dynmap
-
-.PHONY: turmites
-turmites:
-	make -C turmites
-
-.PHONY: worldedit
-worldedit:
-	cd worldedit && { ./gradlew build || { echo '========= try to run: make fix'; exit 1; }; }
-
-.PHONY: clean
-clean:
-	cd worldedit && ./gradlew clean
-	for a in $(SUBDIR); do make -C '$$a' clean; done
-
-.PHONY: distclean
-distclean:	clean
-	for a in $(SUBDIR); do make -C '$$a' distclean; done
-
-.PHONY: fix
-fix:
-	cd worldedit && ./gradlew --refresh-dependencies
+clean distclean:
+	for a in *; do [ -d "$$a" ] || continue; make -C "$$a" $@; done
 

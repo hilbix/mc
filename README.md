@@ -1,28 +1,24 @@
 Setup runnable CraftBukkit by running `make`, as it ought to be.
 
-For the really impatient, followint steps are needed:
-- From a freshly created account on Deian Jesse with all neccessary prerequisites installed
-- To a running Craftbukkit with DynMap (and WorldEdit) available.
+For the really impatient:
+- Following steps are needed to run Craftbukkit 1.8 including plugins DynMap (and WorldEdit):
+- Create a new blank user on a Debian Jessie with all neccessary prerequisites installed.
+- Enter that user somehow.  Then do:
 
 ```
 cd
 git clone https://github.com/hilbix/mc.git
 cd mc
 git submodule update --init --recursive
-make
 make install
 hash -r
 bukkit
-# Answer the questions
-# Then, you can enter commands.  To start the server use:
+# Answer the questions on the screen
+# Then you can enter commands.  To start the server use:
 start
 ```
 
-Bukkit listens on port 25565 by default.
-
-This works for:
-- Debian with all neccessary preriquisites installed
-- a fresh login, so nothing is in the way
+Bukkit listens on port 25565 for connections by default, as usual.
 
 
 # MCbuild
@@ -33,7 +29,7 @@ Thanks to spigotmc.org for doing 99.99% of the really hard work.
 > This assumes that it is installed and run from an empty home directory.
 > Also this probably only works if you do not tweak things too much.
 > So always have a good current backup handy, as I cannot help you.
-> This might break seriously.  **Use at own risk.**  You have been warned.
+> This repo might break seriously.  **Use at your own risk.**  You have been warned.
 
 This was tested on a nonpublic 1-2 user VM with 6 GB RAM, 3 CPU threads of a 3.4 GHz i7
 
@@ -42,17 +38,19 @@ This was tested on a nonpublic 1-2 user VM with 6 GB RAM, 3 CPU threads of a 3.4
 
 This needs around 1 GB in `mc/`, and a lot more in `bukkit/`
 
-Prepare a fresh Debian (Jessie) like following:
+Prepare a fresh Debian (Jessie) with `sudo` for your login user.  Then do:
 
 ```bash
-sudo apt-get install git gawk build-essential wget socat
-sudo apt-get install openjdk-7-jdk
+sudo apt-get install git gawk build-essential wget socat		# For build and tools
+sudo apt-get install openjdk-7-jdk					# Bukkit
 sudo apt-get install libzmq3-dev pkg-config libtool-bin autoconf	# ZeroMQ java binding
-sudo apt-get install maven				# for dynmap
-adduser --disabled-password --gecos 'Minecraft 1.8' mc
+sudo apt-get install maven						# dynmap
+sudo adduser --disabled-password --gecos 'Minecraft 1.8' mc		# create user "mc"
 ```
 
-Switch into the context of this `mc` user.
+Enter this new user `mc`, you can use: `sudo su - mc`
+
+All following is done in the context of this new `mc` user:
 
 ```bash
 cd
@@ -70,15 +68,15 @@ cd mc
 make install
 ```
 
-This installs everyting:
+This installs everything:
 
-- `~/bin/bukkit` which accesses Bukkit which is started by '~/autostart/bukkit.sh`
+- `~/bin/bukkit` which accesses Bukkit console.  Leave this console with `Ctrl+D` (aka `EOF` or `^D`) while bukkit continues to run in background.
 - `~/autostart/bukkit.sh`:  An interactive background script which allows you to control the server
 - A `cron` job which runs '~/bin/autostart.sh' each minute, such that scripts in `~/autostart/` are automatically started
 - Some more helpers into `~/bin` which may be explained in future
 - It also tells you how to proceed
 
-Perhaps, after install, you need to do `hash -r` or a relogin for the commands to work.
+Perhaps, after install, you need to do `hash -r` or do a relogin for the commands to work.
 
 Note:
 
@@ -95,11 +93,13 @@ Note:
 
 - If you have some `git` trouble, try `git status` and correct until `git status` is clean
 
-- To update the version of spigot: `cd && cd mc && make update && bukkit stop` (assumes autostart is on)
+- To update the version of Bukkit provided by Spigot: `cd && cd mc && make update && bukkit stop` (assumes autostart is on)
 
 - If `make` fails try `make clean all` instead
 
 - If `make update` fails, try `make clean update` instead
+
+- Look at the output.  There might be hints when to run `make fix` in case `maven` or `gradle` misbehave (as `make distclean` might not help in that case).
 
 
 ## Helpers
@@ -109,23 +109,23 @@ Note:
 
 ## Contents
 
-- `jar/craftbukkit-1.8.jar` build by invoking the Spigot build process
+- `jar/craftbukkit-1.8.jar` build by invoking the Spigot provided build process
 - `jar/dynmap.jar` suitable for this Craftbukkit 1.8
 - `jar/worldedit.jar` suitable for this Craftbukkit 1.8
 - `jar/turmites.jar` suitable for this Craftbukkit 1.8
 
-Turmites is, why I created this.  They are not ready yet.  But following works:
+FYI: Turmites is, why I created this.  This is terribly incomplete yet.  But following works:
 
 - load/save books (see `/t load` and `/t save`)
 - set fly and walkspeed (see `/t set`)
-- get the position of any player
+- get the position of any player (see `/t get`)
 
-Note that the `turmites` plugin will change in future.  And if `turmites` is ripe enough to replace worldedit, I will drop `worldedit` support.
+Note that the `turmites` plugin will change in future.  And if `turmites` is ripe enough to replace `worldedit`, I will drop `worldedit` support (sorry, but `worldedit` is like cheating).
 
 
 ## Missing links
 
-These are not yet properly documented here:
+Following is not yet properly documented here:
 
 - Bukkit is probably not properly configured:
   - `~/bukkit/server.properties`
@@ -142,9 +142,9 @@ You currently have to do this as usual on your own, sorry, no support here for t
 
 Things you probably want to try (beginners hints):
 
-- `op YOURPLAYER` on the `bukkit` console.  This works if the server runs.
+- `op YOURPLAYERNAME` on the `bukkit` console.  This works if the server runs.
 - Stop the server using the server's `stop` command.
-- After stopping, you can backup the server with the `backup` command (this needs some additional steps outside the `bukkit` script, which are told peu-a-peu if you give `backup`).  This backs up all the data under `~/bukkit` (but no other data!).  Beware, backups take a while and the backup is done to the local drive, so you probably want to save the backups somewhere really safe.
+- After stopping, you can backup the server with the `backup` command (this needs some additional steps outside the `bukkit` script, which are told peu-a-peu if you enter `backup`).  This backs up all the data under `~/bukkit` (but no other data!).  Beware, backups take a while and the backup is done to the local drive, so you probably want to save the backups somewhere really safe.
 - You probably want to enable `auto` mode and later `bkon` (automatically backup) mode as well.
 
 
@@ -153,7 +153,7 @@ Things you probably want to try (beginners hints):
 - Q: I have a FAQ
 > A: Try https://github.com/hilbix/mc/wiki for mor FAQs.
 > You can try https://hydra.geht.net/pager.php and perhaps I will listen.
-> And BTW if you mark such messages "important" if they are not important to me, you just demonstrate, that you are mentally retarded.
+> And BTW if you mark such messages "important" if they are not really life-threatening, you just demonstrate, that you are mentally retarded.
 
 - Q: `bukkit` gives something like `blah socat blah: Connection refused`
 > A: look in `crontab -l` if `bin/autostart.sh`. Try `bash -x bin/autostart.sh` to diagnose.
@@ -166,9 +166,9 @@ Things you probably want to try (beginners hints):
 - Q: `bukkit cmd` delays two seconds and if commands are given in parallel, the output is mixed.
 > A: There is no workaround known for this, and probably will never be.
 > There is only a single bukkit console which is shared across all parallel running accesses.
-> It's like a small chat system where everybody sees what others say.
+> It's like a small chat system where everybody sees what others type.
 > And there is no way to know when output of a command ends, so this is "detected" via silence.
-> Not that this is more a limitation how java is controlled from commandline than the scripts here.
+> Note that this is more a limitation how java is controlled from commandline than the scripts here.
 
 - Q: `bukkit CMD` does not support interactive commands
 > A: Yes, this is a limitation.  Use `bukkit` and then enter the `CMD`
@@ -180,51 +180,53 @@ Things you probably want to try (beginners hints):
 > If you see some `OOPS`, follow instructions which are printed, then retry.
 > Note that `~/backup` can be a softlink which points to where you want to keep your backups written by `attic`.
 
-- Q: How to restore?
-> A: Please read `man attic`.  Use `~/backup/mc.attic` as `ARCHIVE`.
-> But I cannot help you more on this subject, as `attic` is a pretty standard Linux command.
+- Q: How to restore from the backup?
+> A: Try `backup.sh mount`, the `attic` archives are then in directory `~/restore`.
+> You can also run `attic list ~/backup/mc.attic` to list the `BACKUP`s and then run something like `attic extract -vn ~/backup/mc.attic::BACKUP` etc.
+> `attic` is a pretty standard Linux command, so please help yourself (RTFM).
 
 > Q: What is the `move` command?
-> A: There is no example script for this yet.  If `~/bin/mover.sh` is present, it shall be a wrapper which copies `~/backup/.` to a remote server.   It is forked in background automatically after backup.  Perhaps create something which uses `rsync` for this.  Or wraps some script from your ISP to do backups.
+> A: There is no example script for this yet.  If `~/bin/mover.sh` is present, it shall be a wrapper which copies `~/backup/.` to a remote server.   It is forked in background automatically after backup.  Perhaps create something which uses `rsync` for this.  Or wrap some script from your ISP to do backups.
 
 - Q: How do I run Minecraft?
 > A: This is not the Minecraft game.  This prepares a CraftBukkit 1.8 Minecraft Server.  Only.  If you do no know what this means, you are probably wrong here.
 
 - Q: But I want to run Minecraft!
-> A: Buy it.
+> A: Minecraft must be bought from Mojang/Microsoft at http://minecraft.net/
 
 - Q: I want Spigot.
 > A: Look elsewhere.  I do not know anything about Spigot yet and probably never will.
 
 - Q: I want Sponge.
-> A: Sorry, you have to look elsewhere for now becasue I did not manage to run Sponge properly yet, sadly.
-> However if somebody wants to enlighten me in how to setup and run sponge just by typing `make` such that it runs at least as stable as Bukkit based on Spigot, please leave me a message: http://hydra.geht.net/pager.php
+> A: Sorry, you have to look elsewhere for now because I did not manage to run Sponge properly yet, sadly.
+> However if somebody wants to enlighten me in how to setup and run Sponge just by typing `make` such that it runs at least as stable as Bukkit based on Spigot, please leave me a message: http://hydra.geht.net/pager.php
 
 - Q: It does not work.
-> A: If this here does not help you, sorry, I cannot help.  Learn how to debug shell scripts and cron jobs and then follow the yellow brick road (start at `crontab -l`).
+> A: If this here does not help you, sorry, I cannot help.  Learn how to debug shell scripts and cron jobs and then follow the yellow brick road (start at `crontab -l`).  If you found the fix, see "I found a bug!"
 
 - Q: Please can you help?
 > A: Nope, I really cannot help you!  Sorry.
 
 - Q: How to run this under Windows/OS-X/BSD/RHEL/etc.
 > A: This works under Debian Linux.  Everything else is up to you.
+> But for Windows you might try cygwin.com as environment to build.
 
 - Q: I found a bug!
-> A: Clone, fix, push, pull-request.  Perhaps I listen.  Likely not.
+> A: Clone, fix, push, send pull-request on Github.  Perhaps I listen.  Likely not.
 
 - Q: This is not secure!
 > A: It works as designed.  But see "I found a bug!".
 
-- Q: Can you add plugin XYZ.
-> A: Nope.  But you can.  `git submodule add URL-of-your-plugin-builder contrib/pluginname; cd contrib; vim Makefile`.
-> See `compile/` for example.
+- Q: Can you please add plugin XYZ?
+> A: Nope.  But you can.  `mkdir contrib/contribname; git clone GITURL-of-plugin.git contrib/XYZ/source/;  cd contrib/XYZ; ln -s ../../jar; cp ../Makefile Makefile; vim Makefile` and create a proper Makefile to wrap the build and install stages from `source/`.  Note that the plugin then is installed as `~/bukkit/plugins/XYZ.jar`
+> See `compile/dynmap/Makefile` for an example how it may look like.  If you think it's worthwhile, perhaps send a pull-request.
 
-- Q: So what are turmites?
-> A: Just a name in that case here.  For more background please see Wikipedia.
+- Q: So what are `turmites`?
+> A: Just a working-name in that case here.  For more background please see Wikipedia.
 
 - Q: License?
 > A: Are you kidding?  This?  Free, what else!  Parts of the software linked here is Open Source with different licenses, of course.
 
 - Q: Author?
-> A: Not important.  This only assembles many things done by others.  Read the source for more information.
+> A: Really not important.  This only assembles many things done by others.  Read the source for more information.
 

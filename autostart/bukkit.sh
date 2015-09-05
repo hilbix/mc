@@ -2,12 +2,17 @@
 
 WAIT=10
 
+SERVER=craftbukkit.jar
+
 HERE="$PWD"
+DIR="$(basename "$0" .sh)"
+
 BACKUP="$HERE/bin/backup.sh"
 MOVER="$HERE/bin/mover.sh"
-DIR=bukkit
-CONF="$HERE/.$DIR.conf"
-SERVER=craftbukkit.jar
+
+CONF="$HERE/$DIR"
+CONF="${XDG_CONFIG_HOME:-$HOME/.config}/$DIR/${CONF#$HOME}-settings"
+
 EULA=eula.txt
 AUTOBACKUP=.autobackup
 
@@ -33,13 +38,13 @@ sleep 1
 backup()
 {
 [ -f .backupped ] && log "already backed up, to rerun: rm -f '$PWD/.backupped'" && return
-"$BACKUP" && touch .backupped && log 'Backup successful' && [ -x "$MOVER" ] && mover
+"$BACKUP" "$@" && touch .backupped && log 'Backup successful' && [ -x "$MOVER" ] && mover
 }
 
 autobackup()
 {
 [ -f "$AUTOBACKUP" ] || return
-backup
+backup auto
 }
 
 : ok file key sep value
@@ -127,6 +132,8 @@ $JAVA $JAVARGS -jar "$SERVER"
 log TERMINATED with error code $?
 }
 
+mkdir -pm0700 "$(dirname "$CONF")" && : >> "$CONF" || OOPS "cannot create $CONF"
+
 cd "$DIR" || OOPS "missing $DIR"
 
 log $DIR CONTROL started
@@ -165,10 +172,10 @@ do
 	wait)	echo Waiting; wait; continue;;
 	halt)	auto=false; continue;;
 	noauto|noautostart)	rm -f .RUNNING; continue;;
-	backup)	backup; continue;;
+	backup)	backup backup; continue;;
 	bkon)	touch "$AUTOBACKUP"; continue;;
 	bkoff)	rm -f "$AUTOBACKUP"; continue;;
-	list|info|check)	"$BACKUP" "$cmd";;
+	list|info|check|prune)	"$BACKUP" "$cmd";;
 	info' '*)		"$BACKUP" "${cmd%% *}" "${cmd#* }";;
 	auto|autostart)	touch .RUNNING;;
 	setup|settings)	setup false;;
@@ -185,6 +192,7 @@ do
 		echo "	bkon	switch autobackup on" &&
 		echo "	list	list backups" &&
 		echo "	info	get info on backup" &&
+		echo "	prune	prune backups (included in autobackup)" &&
 		echo "	check	check backup archive (warning: this takes very long)" &&
 		[ -x "$MOVER" ] &&
 		echo "	move	start data mover again (to transfers backups)" &&

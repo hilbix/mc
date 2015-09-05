@@ -1,19 +1,9 @@
-#
+# Generic Makefile: Make all the subdirectories
 
-CONTRIB=
+.PHONY: all clean distclean install fix
+all install fix:
+	for a in *; do [ -d "$$a" ] || continue; make -C "$$a" $@ || exit; done
 
-.PHONY: all
-all:
-
-.PHONY: clean
-clean:
-	for a in $(CONTRIB); do make -C "$$a" clean; done
-
-.PHONY: realclean
-distclean:	clean
-	for a in $(CONTRIB); do make -C "$$a" distclean; done
-
-.PHONY: install
-install:	all
-	for a in $(CONTRIB); do make -C "$$a" install; done
+clean distclean:
+	for a in *; do [ -d "$$a" ] || continue; make -C "$$a" $@; done
 

@@ -6,10 +6,6 @@
 JARNAM=craftbukkit
 JARVER=1.8
 #
-# WorldEdit version
-WEVER=*-SNAPSHOT
-DMVER=*-SNAPSHOT
-#
 # When to run cronjob to start server (each minute)
 CRON=* * * * *
 #
@@ -26,11 +22,9 @@ DOCDIR=/var/www/html/doc
 
 SOFTLINKS=autostart jar
 TOOLS=src/nonblocking/nonblocking src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect src/ptybuffer/script/autostart.sh
-CLEANDIRS=src/nonblocking src/ptybuffer compile contrib
-SUBS=jar/turmites.jar jar/worldedit.jar jar/dynmap.jar
+CLEANDIRS=src/nonblocking src/ptybuffer
+SUBS=compile contrib
 CBJAR=$(JARNAM)-$(JARVER).jar
-WORLDEDITJAR=worldedit-bukkit-$(WEVER)-dist.jar
-DYNMAPJAR=dynmap-$(DMVER).jar
 BUILD=tmpbuild
 SPIGOTURL=https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/
 SPIGOTJAR=BuildTools.jar
@@ -39,9 +33,9 @@ SPIGOTJAR=BuildTools.jar
 # all, update
 #
 
-.PHONY: all
-all:	jar/$(CBJAR) $(TOOLS) $(SUBS)
-	make -C contrib all
+.PHONY: all clean distclean install fix
+all:	jar/$(CBJAR) $(TOOLS)
+	for a in $(SUBS); do $(MAKE) -C "$$a" $@ || exit; done
 
 .PHONY: update
 update:	compile
@@ -54,33 +48,8 @@ pull:
 # Tools
 #
 
-src/nonblocking/nonblocking src/ptybuffer/ptybuffer src/ptybuffer/ptybufferconnect:
-	make -C "`dirname '$@'`"
-
-#
-# JARs
-#
-
-jar/turmites.jar:	compile/turmites/turmites.jar
-	rm -f '$@'
-	cp -f $< '$@'
-
-jar/worldedit.jar:	compile/worldedit/worldedit-bukkit/build/libs/$(WORLDEDITJAR)
-	rm -f '$@'
-	cp -f $< '$@'
-
-jar/dynmap.jar:	compile/dynmap/dynmap/target/$(DYNMAPJAR)
-	rm -f '$@'
-	cp -f $< '$@'
-
-compile/dynmap/dynmap/target/$(DYNMAPJAR):
-	make -C compile dynmap
-
-compile/turmites/turmites.jar:	jar/$(CBJAR)
-	make -C compile turmites
-
-compile/worldedit/worldedit-bukkit/build/libs/$(WORLDEDITJAR):
-	make -C compile worldedit
+$(TOOLS):
+	make -C "`dirname '$@'`" all
 
 jar/$(CBJAR) $(BUILD)/Bukkit:
 	make compile
@@ -96,26 +65,25 @@ compile:
 	rm -f 'jar/$(CBJAR)'
 	cp -vf '$(BUILD)/$(JARNAM)-$(JARVER)'*.jar 'jar/$(CBJAR)'
 
-.PHONY: fix
 fix:
-	for a in $(CLEANDIRS); do make -C "$$a" fix; done
+	for a in $(SUBS); do $(MAKE) -C "$$a" $@ || exit; done
 
 #
 # CLEAN
 #
 
-.PHONY: clean
 clean:
-	for a in $(CLEANDIRS); do make -C "$$a" clean; done
+	for a in $(SUBS) $(CLEANDIRS); do $(MAKE) -C "$$a" $@; done
 	rm -rf '$(BUILD)'
 
-.PHONY: distclean
+# cannot wipe the copied JARs which are needed by Bukkit to run, to do that run fullclean
 distclean:	clean
 	# DOC is not cleaned
-	echo "To wipe jar/ which you need this to run Bukkit, use: make fullclean"
-	for a in $(CLEANDIRS); do make -C "$$a" distclean; done
+	for a in $(SUBS) $(CLEANDIRS); do $(MAKE) -C "$$a" $@; done
+	echo "To wipe jar/ which is needed by Bukkit to run, use: make fullclean"
+	echo "Note that $(DOCDIR) is not cleaned, too."
 
-# fullclean wipes the JARs which are needed by Bukkit to run
+# perhaps fullclean will vanish in future (make install then copies jar/ to ../jar)
 .PHONY: fullclean
 fullclean:	distclean
 	rm -rf jar
@@ -131,18 +99,26 @@ doc:	$(BUILD)/Bukkit
 
 .PHONY: install
 install:	all
+	# softlinks
 	for a in $(SOFTLINKS); do rm -f "$$HOME/$$a" && ln -s "$(PWD)/$$a" "$$HOME/$$a"; done
 	rm -f "$$HOME/log" && ln -s "/var/tmp/autostart/$$USER" "$$HOME/log"
+
 	mkdir -p '$(BINDIR)' '$(INSDIR)/plugins'
+	# ~/bin
 	for a in $(TOOLS); do cp -f "$$a" '$(BINDIR)'; done
 	for a in bin/*.sh; do b="`basename "$$a" .sh`" && rm -f "$(BINDIR)/$$b" && ln -s "$(PWD)/$$a" "$$HOME/bin/$$b"; done
 	sbin/add-crontab.sh '$(CRON)' 'bin/autostart.sh >/dev/null' '### autostart bukkit'
+	# ~/bukkit
 	[ -L '$(INSDIR)/$(CBJAR)' ]      || ln -vs '../jar/$(CBJAR)' '$(INSDIR)/$(CBJAR)'
 	[ -L '$(INSDIR)/$(JARNAM).jar' ] || ln -vs '$(CBJAR)' '$(INSDIR)/$(JARNAM).jar'
-	for a in $(SUBS); do [ -L "$(INSDIR)/plugins/`basename "$$a"`" ] || ln -vs "../../$$a" "$(INSDIR)/plugins/`basename "$$a"`"; done
-	make -C contrib install
+
+	for a in $(SUBS); do $(MAKE) -C "$$a" $@ || exit 1; done
+	for a in $(SUBS); do for b in "$$a"/*; do [ -d "$$b" ] || continue; j="`basename "$$b"`.jar"; [ -L "$(INSDIR)/plugins/$$j" ] || ln -vs "../../jar/$$j" "$(INSDIR)/plugins/$$j"; done; done
+
 	@echo
-	@echo "Now run: bukkit"
+	@echo "To install typeahead searchable javadoc index to $(DOCDIR), run: make doc"
+	@echo "Now run:"
+	@echo "	bukkit"
 	@echo "Answer the questions, then just hit the 'enter' key to start the server."
 	@echo "Instead of pressing enter you can give commands like 'help' or 'auto' or 'setup'"
 

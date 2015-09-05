@@ -1,18 +1,24 @@
 #
 
-SUBS=DynmapCoreApi DynmapCore dynmap-api dynmap
+TARGET=dynmap
+SUBS=DynmapCoreApi DynmapCore dynmap-api $(TARGET)
+JARNAME=$(TARGET)/target/dynmap-*-SNAPSHOT.jar
+INSTDIR=jar
 
-.PHONY: all
-all:	dynmap/target/dynmap-*-SNAPSHOT.jar
+.PHONY: all clean distclean install fix
+all:	$(JARNAME)
 
-dynmap/target/dynmap-*-SNAPSHOT.jar:
+$(JARNAME):
 	for a in $(SUBS); do ( cd "$$a" && mvn install || exit; ); done
 
-.PHONY: clean
 clean:
 	for a in $(SUBS); do ( cd "$$a" && mvn clean; ); done
 
-.PHONY: distclean
 distclean:	clean
-	rm -rf jar
+
+install:	all
+	cp -f $(JARNAME) '$(INSTDIR)/$(TARGET).tmp'
+	mv -f '$(INSTDIR)/$(TARGET).tmp' '$(INSTDIR)/$(TARGET).jar'
+
+fix:
 

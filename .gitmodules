@@ -5,7 +5,7 @@
 	path = compile/turmites
 	url = https://github.com/hilbix/turmites.git
 [submodule "compile/worldedit"]
-	path = compile/worldedit
+	path = compile/worldedit/worldedit
 	url = https://github.com/sk89q/WorldEdit.git
 [submodule "compile/dynmap/DynmapCoreApi"]
 	path = compile/dynmap/DynmapCoreApi
