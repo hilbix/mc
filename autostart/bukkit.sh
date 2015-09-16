@@ -98,11 +98,14 @@ config="$4 $5"
 conf="$(sed -n "s|^$config	||p" "$CONF")"
 ok "$4" "$5" "$6" "${conf:-$7}"
 prev=$?
-$1 && [ -n "$conf" ] && [ 0 = $prev ] && return
-
-# takes conf/prev
-"${@:2}"
-# returns conf
+if	$1 && [ -n "$conf" ]
+then
+	[ 0 = $prev ] && return
+else
+	# takes conf/prev
+	"${@:2}"
+	# returns conf
+fi
 
 [ -n "$conf" ] || return
 modify "$4" "$5" "$6" "$conf"
@@ -113,12 +116,25 @@ modify "$CONF" "$config" "	" "$conf"
 setup()
 {
 [ -f "$SERVER" ] || return
-[ -f "$EULA" ] || start			# run once to populate directory
+
+# Do we need the EULA?
+shot=false
+[ -f "$EULA" ] || shot=true
+$shot && populate		# run once to populate directory
 check "$1" agree EULA "$EULA" eula = true
+$shot && populate		# run again after EULA to populate rest of files
 
 check "$1" yesno 'Prevent plugin metrics from phoning home' plugins/PluginMetrics/config.yml opt-out ': ' true false
 check "$1" yesno 'Prevent snooper from phoning home' server.properties snooper-enabled = false true
 check "$1" yesno 'Disable dynmap webservice' plugins/dynmap/configuration.txt disable-webserver ': ' true false
+}
+
+# Starte the server to populate files etc.
+: populate
+populate()
+{
+# Luckily, that works
+echo stop | start
 }
 
 : start
@@ -141,8 +157,8 @@ cd "$DIR" || OOPS "missing $DIR"
 
 log $DIR CONTROL started
 
-setup true
 autobackup
+setup true
 
 auto=:
 while	
@@ -167,6 +183,7 @@ do
 	case "$cmd" in
 	''|start|run)
 		autobackup
+		setup true
 		start
 		autobackup
 		;;
