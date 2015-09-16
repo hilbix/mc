@@ -12,9 +12,10 @@ $(JARNAME):
 	for a in $(SUBS); do ( cd "$$a" && mvn install || exit; ); done
 
 clean:
-	for a in $(SUBS); do ( cd "$$a" && mvn clean; ); done
+	-for a in $(SUBS); do ( cd "$$a" && mvn clean; ); done
 
 distclean:	clean
+	-for a in $(SUBS); do ( cd "$$a" && git clean -xdf; ); done
 
 install:	all
 	cp -f $(JARNAME) '$(INSTDIR)/$(TARGET).tmp'

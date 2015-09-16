@@ -93,11 +93,12 @@ esac
 : check 1mode 2typefn 3question 4file 5key 6sep 7val..
 check()
 {
+[ -f "$CONF" ] || touch "$CONF"
 config="$4 $5"
 conf="$(sed -n "s|^$config	||p" "$CONF")"
 ok "$4" "$5" "$6" "${conf:-$7}"
 prev=$?
-$1 && [ 0 = $prev ] && return
+$1 && [ -n "$conf" ] && [ 0 = $prev ] && return
 
 # takes conf/prev
 "${@:2}"
@@ -108,17 +109,19 @@ modify "$4" "$5" "$6" "$conf"
 modify "$CONF" "$config" "	" "$conf"
 }
 
+: setup true/false # interaction
 setup()
 {
 [ -f "$SERVER" ] || return
-[ -f "$EULA" ] || run			# run once to populate directory
-
+[ -f "$EULA" ] || start			# run once to populate directory
 check "$1" agree EULA "$EULA" eula = true
+
 check "$1" yesno 'Prevent plugin metrics from phoning home' plugins/PluginMetrics/config.yml opt-out ': ' true false
 check "$1" yesno 'Prevent snooper from phoning home' server.properties snooper-enabled = false true
 check "$1" yesno 'Disable dynmap webservice' plugins/dynmap/configuration.txt disable-webserver ': ' true false
 }
 
+: start
 start()
 {
 rm -f .backupped

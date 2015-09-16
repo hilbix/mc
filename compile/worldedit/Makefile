@@ -9,17 +9,19 @@ INSTDIR=jar
 all:	$(JARNAME)
 
 $(JARNAME):
-	for a in $(SUBS); do ( cd "$$a" && ./gradlew build || { echo '========= try to run: make fix'; exit 1; } ); done
+	-for a in $(SUBS); do [ ! -d "$$a/.gradle" ] && ( cd "$$a" && ./gradlew clean setupDevWorkspace ); done
+	for a in $(SUBS); do ( cd "$$a" && ./gradlew build || { echo '========= try to run: make fix'; exit 1; } ) || exit; done
 
 clean:
-	cd '$(TARGET)' && ./gradlew clean
+	-for a in $(SUBS); do ( cd "$$a" && ./gradlew clean; ); done
 
 distclean:	clean
+	-for a in $(SUBS); do ( cd "$$a" && git clean -xdf; ); done
 
 install:	all
 	cp -f $(JARNAME) '$(INSTDIR)/$(TARGET).tmp'
 	mv -f '$(INSTDIR)/$(TARGET).tmp' '$(INSTDIR)/$(TARGET).jar'
 
 fix:
-	cd '$(TARGET)' && ./gradlew --refresh-dependencies
+	-for a in $(SUBS); do ( cd "$$a"; ./gradlew clean setupDevWorkspace; ./gradlew --refresh-dependencies; ); done
 
