@@ -2,7 +2,7 @@ Setup runnable Spigot by running `make`, as it ought to be.
 
 For the really impatient:
 - Following steps are needed to run Spigot including plugins DynMap (and WorldEdit):
-- Create a new blank user on a Debian Jessie with all neccessary prerequisites installed.
+- Create a new blank user on a Debian Jessie 64 bit with all neccessary prerequisites installed.
 - Enter that user somehow.  Then do:
 
 ```
@@ -40,7 +40,7 @@ This was tested on a nonpublic 1-2 user VM with 6 GB RAM, 3 CPU threads of a 3.4
 
 This needs around 1 GB in `mc/`, and a lot more in `bukkit/`
 
-Prepare a fresh Debian (Jessie) with `sudo` for your login user.  Then do:
+Prepare a fresh 64-Bit Debian (Jessie) with at least 6 GB RAM and `sudo` for your login user.  Then do:
 
 ```bash
 sudo apt-get install git gawk build-essential wget socat		# For build and tools
