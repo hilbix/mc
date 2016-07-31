@@ -3,8 +3,8 @@
 # CONFIG:
 #
 # CraftBukkit version
-JARNAM=craftbukkit
-JARVER=1.8
+JARNAM=spigot
+JARVER=1.10.2
 #
 # When to run cronjob to start server (each minute)
 CRON=* * * * *

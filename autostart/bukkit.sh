@@ -2,7 +2,7 @@
 
 WAIT=10
 
-SERVER=craftbukkit.jar
+SERVER=spigot.jar
 
 HERE="$PWD"
 DIR="$(basename "$0" .sh)"

@@ -1,7 +1,7 @@
-Setup runnable CraftBukkit by running `make`, as it ought to be.
+Setup runnable Spigot by running `make`, as it ought to be.
 
 For the really impatient:
-- Following steps are needed to run Craftbukkit 1.8 including plugins DynMap (and WorldEdit):
+- Following steps are needed to run Spigot including plugins DynMap (and WorldEdit):
 - Create a new blank user on a Debian Jessie with all neccessary prerequisites installed.
 - Enter that user somehow.  Then do:
 
@@ -18,7 +18,9 @@ bukkit
 start
 ```
 
-Bukkit listens on port 25565 for connections by default, as usual.
+Spigot listens on port 25565 for connections by default, as usual.
+
+Please note that the binary still is called `bukkit`.  Perhaps a future version will be renamed to `spigot`.
 
 
 # MCbuild
@@ -42,7 +44,7 @@ Prepare a fresh Debian (Jessie) with `sudo` for your login user.  Then do:
 
 ```bash
 sudo apt-get install git gawk build-essential wget socat		# For build and tools
-sudo apt-get install openjdk-7-jdk					# Bukkit
+sudo apt-get install openjdk-8-jdk					# Spigot
 sudo apt-get install libzmq3-dev pkg-config libtool-bin autoconf	# ZeroMQ java binding
 sudo apt-get install maven						# dynmap
 sudo adduser --disabled-password --gecos 'Minecraft 1.8' mc		# create user "mc"
@@ -70,7 +72,7 @@ make install
 
 This installs everything:
 
-- `~/bin/bukkit` which accesses Bukkit console.  Leave this console with `Ctrl+D` (aka `EOF` or `^D`) while bukkit continues to run in background.
+- `~/bin/bukkit` which accesses Spigot console.  Leave this console with `Ctrl+D` (aka `EOF` or `^D`) while bukkit continues to run in background.
 - `~/autostart/bukkit.sh`:  An interactive background script which allows you to control the server
 - A `cron` job which runs '~/bin/autostart.sh' each minute, such that scripts in `~/autostart/` are automatically started
 - Some more helpers into `~/bin` which may be explained in future
@@ -80,7 +82,7 @@ Perhaps, after install, you need to do `hash -r` or do a relogin for the command
 
 Note:
 
-- To access the server console, run `bukkit` without parameters.  `bukkit` gives some good login-shell for Bukkit admins.  Execute from `.ssh/authorized_keys` (perhaps I can explain in future deeper)
+- To access the server console, run `bukkit` without parameters.  `bukkit` gives some good login-shell for Spigot admins.  Execute from `.ssh/authorized_keys` (perhaps I can explain in future deeper)
 
 - If you execute `bukkit` and see `connect: Connection refused` then run `autostart.sh` (it is in `~/bin/`) to start the control script.  If this does not help, do a `less ~/log/bukkit.out` and look at the end of this file.
 
@@ -93,7 +95,7 @@ Note:
 
 - If you have some `git` trouble, try `git status` and correct until `git status` is clean
 
-- To update the version of Bukkit provided by Spigot: `cd && cd mc && make update && bukkit stop` (assumes autostart is on)
+- To update the version of Spigot provided by Spigot: `cd && cd mc && make update && bukkit stop` (assumes autostart is on)
 
 - If `make` fails try `make clean all` instead
 
@@ -104,15 +106,15 @@ Note:
 
 ## Helpers
 
-- `make doc`:  This installs a searchable index for the Bukkit-API into `/var/www/html/doc/bukkit/` (switch to "Index" to see a type ahead search bar, which is very helpful to locate things quickly in the Bukkit API)
+- `make doc`:  This installs a searchable index for the Bukkit-API into `/var/www/html/doc/bukkit/` (switch to "Index" to see a type ahead search bar, which is very helpful to locate things quickly in the Bukkit-API)
 
 
 ## Contents
 
-- `jar/craftbukkit-1.8.jar` build by invoking the Spigot provided build process
-- `jar/dynmap.jar` suitable for this Craftbukkit 1.8
-- `jar/worldedit.jar` suitable for this Craftbukkit 1.8
-- `jar/turmites.jar` suitable for this Craftbukkit 1.8
+- `jar/spigot-....jar` build by invoking the Spigot provided build process
+- `jar/dynmap.jar` suitable for this version
+- `jar/worldedit.jar` suitable for this version
+- `jar/turmites.jar` suitable for this version
 
 FYI: Turmites is, why I created this.  This is terribly incomplete yet.  But following works:
 
@@ -127,7 +129,7 @@ Note that the `turmites` plugin will change in future.  And if `turmites` is rip
 
 Following is not yet properly documented here:
 
-- Bukkit is probably not properly configured:
+- Spigot is probably not properly configured:
   - `~/bukkit/server.properties`
   - `~/bukkit/bukkit.yml`
   - `~/bukkit/permissions.yml`
@@ -135,7 +137,7 @@ Following is not yet properly documented here:
   - `~/bukkit/plugins/PluginMetrics/config.yml`
 - Dynmap is not properly configured:
   - `~/bukkit/plugins/dynmap/`
-- You probably want to configure Putty/ssh such, that you can connect to Bukkit via a tunnel.
+- You probably want to configure Putty/ssh such, that you can connect to Spigot via a tunnel.
 - You probably want to protect port 25565 against connections from unauthenticated users.
 
 You currently have to do this as usual on your own, sorry, no support here for this yet.
@@ -189,17 +191,17 @@ Things you probably want to try (beginners hints):
 > A: There is no example script for this yet.  If `~/bin/mover.sh` is present, it shall be a wrapper which copies `~/backup/.` to a remote server.   It is forked in background automatically after backup.  Perhaps create something which uses `rsync` for this.  Or wrap some script from your ISP to do backups.
 
 - Q: How do I run Minecraft?
-> A: This is not the Minecraft game.  This prepares a CraftBukkit 1.8 Minecraft Server.  Only.  If you do no know what this means, you are probably wrong here.
+> A: This is not the Minecraft game.  This prepares a Spigot Minecraft Server.  Only.  If you do no know what this means, you are probably wrong here.
 
 - Q: But I want to run Minecraft!
 > A: Minecraft must be bought from Mojang/Microsoft at http://minecraft.net/
 
-- Q: I want Spigot.
-> A: Look elsewhere.  I do not know anything about Spigot yet and probably never will.
+- Q: I want Bukkit.
+> A: Look out for the old version, this was for Bukkit.
 
 - Q: I want Sponge.
 > A: Sorry, you have to look elsewhere for now because I did not manage to run Sponge properly yet, sadly.
-> However if somebody wants to enlighten me in how to setup and run Sponge just by typing `make` such that it runs at least as stable as Bukkit based on Spigot, please leave me a message: http://hydra.geht.net/pager.php
+> However if somebody wants to enlighten me in how to setup and run Sponge just by typing `make` such that it runs at least as stable as Spigot, please leave me a message: http://hydra.geht.net/pager.php
 
 - Q: It does not work.
 > A: If this here does not help you, sorry, I cannot help.  Learn how to debug shell scripts and cron jobs and then follow the yellow brick road (start at `crontab -l`).  If you found the fix, see "I found a bug!"
